@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { draftEmail } from "@/ai/flows/draft-email";
 import { generateCallScript } from "@/ai/flows/generate-call-script";
-// import {sendEmail} from '@/services/email';
+import { sendEmail } from "@/services/email";
 import { placeCall } from "@/services/livekit";
 import { useState } from "react";
 import { Mail, Phone } from "lucide-react";
@@ -23,6 +23,7 @@ export default function Home() {
   const [emailDraft, setEmailDraft] = useState("");
   const [callScript, setCallScript] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
 
   const handleDraftEmail = async () => {
     const result = await draftEmail({ prompt });
@@ -34,18 +35,48 @@ export default function Home() {
     setCallScript(result.script);
   };
 
-  // const handleSendEmail = async () => {
-  //   if (!recipient) {
-  //     alert('Please enter a recipient email.');
-  //     return;
-  //   }
-  //   const result = await sendEmail(recipient, 'Email Draft', emailDraft);
-  //   if (result.success) {
-  //     alert('Email sent successfully!');
-  //   } else {
-  //     alert(`Email sending failed: ${result.errorMessage}`);
-  //   }
-  // };
+  const handleSendEmail = async () => {
+    if (!recipient) {
+      alert("Please enter a recipient email address.");
+      return;
+    }
+    if (!emailDraft) {
+      alert("Please generate or write an email draft first.");
+      return;
+    }
+
+    setIsSendingEmail(true);
+
+    const lines = emailDraft.trim().split("\n");
+    let subject = "Email from Granteri";
+    let body = emailDraft;
+
+    if (lines.length > 1 && lines[0].toLowerCase().startsWith("subject:")) {
+      subject = lines[0].substring(8).trim();
+      body = lines.slice(1).join("\n").trim();
+    } else if (
+      lines.length > 0 &&
+      !lines[0].includes("@") &&
+      lines[0].length < 100
+    ) {
+      subject = lines[0].trim();
+      body = lines.slice(1).join("\n").trim();
+    }
+
+    try {
+      const result = await sendEmail({ to: recipient, subject, body });
+      if (result.success) {
+        alert("Email sent successfully!");
+      } else {
+        alert(`Email sending failed: ${result.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      alert("An unexpected error occurred while sending the email.");
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
 
   const handlePlaceCall = async () => {
     const result = await placeCall("123-456-7890", callScript);
@@ -95,7 +126,7 @@ export default function Home() {
         <CardHeader>
           <h2 className="section-header">Email Draft</h2>
           <p className="section-description">
-            View and edit the generated email draft.
+            View, edit, and send the generated email draft.
           </p>
         </CardHeader>
         <CardContent className="card-content">
@@ -110,9 +141,10 @@ export default function Home() {
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
               className="shine-placeholder"
+              required
             />
             <Label htmlFor="email-draft" className="input-label">
-              Email Content
+              Email Content (Edit if needed)
             </Label>
             <div className="gradient-border">
               <Textarea
@@ -121,19 +153,18 @@ export default function Home() {
                 onChange={(e) => setEmailDraft(e.target.value)}
                 placeholder="Your generated email will appear here..."
                 className="shine-placeholder"
+                rows={10}
               />
             </div>
           </div>
-          <Button disabled={true} className="btn btn-accent">
+          <Button
+            onClick={handleSendEmail}
+            disabled={isSendingEmail || !recipient || !emailDraft}
+            className="btn btn-accent w-full mt-4"
+          >
             <Mail className="mr-2 h-4 w-4" />
-            Send Email (Currently Unavailable)
+            {isSendingEmail ? "Sending..." : "Send Email"}
           </Button>
-          <div>
-            <p className="info-text">
-              Email sending functionality is currently unavailable as it is
-              being migrated to a Python backend.
-            </p>
-          </div>
         </CardContent>
       </Card>
 

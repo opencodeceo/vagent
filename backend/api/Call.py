@@ -32,6 +32,20 @@ async def entrypoint(ctx: agents.JobContext):
             temperature=0.8,
             instructions="You are a helpful assistant",
         ),
+        tts=elevenlabs.TTS(
+            voice_id="ODq5zmih8GrVes37Dizd",
+            model="eleven_multilingual_v2"
+        ),
+        stt = deepgram.STT(
+            model="nova-2-general",
+            interim_results=True,
+            smart_format=True,
+            punctuate=True,
+            filler_words=True,
+            profanity_filter=False,
+            keywords=[("LiveKit", 1.5)],
+            language="en-US",
+   ),
         
     )
 

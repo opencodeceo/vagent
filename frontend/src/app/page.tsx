@@ -60,7 +60,7 @@ export default function Home() {
             Granteri <span className="moon-icon">🌓</span>
           </h1>
           <p className="hero-description">
-            Draft emails and generate call scripts with Granteri 🌓. Enhance
+            Draft emails and generate call scripts with Granteri 🌓.\nEnhance
             your communication with AI-powered assistance.
           </p>
         </CardHeader>

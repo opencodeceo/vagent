@@ -1,0 +1,15 @@
+{"timestamp": "2025-04-18 09:33:04,534", "level": "INFO", "logger": "__main__", "message": "Logging system initialized with tabular and JSON formats", "module": "Email", "function": "setup_logging", "line": 152}
+{"timestamp": "2025-04-18 09:33:04,535", "level": "INFO", "logger": "__main__", "message": "Starting AI Service test suite...", "module": "Email", "function": "sendemail", "line": 474}
+{"timestamp": "2025-04-18 09:33:04,538", "level": "WARNING", "logger": "dotenv.main", "message": "Python-dotenv could not parse statement starting at line 12", "module": "main", "function": "with_warn_for_invalid_lines", "line": 28}
+{"timestamp": "2025-04-18 09:33:04,539", "level": "INFO", "logger": "__main__", "message": "Initialized Gemini model successfully", "module": "Email", "function": "_initialize_ai_models", "line": 187}
+{"timestamp": "2025-04-18 09:33:04,540", "level": "INFO", "logger": "__main__", "message": "Initializing Gmail service...", "module": "Email", "function": "_initialize_gmail_service", "line": 200}
+{"timestamp": "2025-04-18 09:33:04,541", "level": "INFO", "logger": "__main__", "message": "Getting Gmail credentials...", "module": "Email", "function": "_initialize_gmail_service", "line": 202}
+{"timestamp": "2025-04-18 09:33:04,541", "level": "INFO", "logger": "__main__", "message": "Checking if token file exists at: C:\\Users\\openc\\OneDrive\\Documents\\agent\\vagent\\backend\\api\\token.json", "module": "Email", "function": "_get_gmail_credentials", "line": 215}
+{"timestamp": "2025-04-18 09:33:04,542", "level": "INFO", "logger": "__main__", "message": "Token file exists. Attempting to load credentials from token file.", "module": "Email", "function": "_get_gmail_credentials", "line": 217}
+{"timestamp": "2025-04-18 09:33:04,545", "level": "INFO", "logger": "__main__", "message": "Valid credentials found.", "module": "Email", "function": "_get_gmail_credentials", "line": 248}
+{"timestamp": "2025-04-18 09:33:04,546", "level": "INFO", "logger": "__main__", "message": "Gmail credentials obtained.", "module": "Email", "function": "_initialize_gmail_service", "line": 204}
+{"timestamp": "2025-04-18 09:33:04,551", "level": "INFO", "logger": "googleapiclient.discovery_cache", "message": "file_cache is only supported with oauth2client<4.0.0", "module": "__init__", "function": "autodetect", "line": 49}
+{"timestamp": "2025-04-18 09:33:04,557", "level": "INFO", "logger": "__main__", "message": "Initialized Gmail service successfully", "module": "Email", "function": "_initialize_gmail_service", "line": 206}
+{"timestamp": "2025-04-18 09:33:04,558", "level": "INFO", "logger": "__main__", "message": "Gmail service initialized: True", "module": "Email", "function": "_initialize_gmail_service", "line": 210}
+{"timestamp": "2025-04-18 09:33:56,588", "level": "INFO", "logger": "__main__", "message": "Email sent successfully to kejimone30@gmail.com", "module": "Email", "function": "send_email", "line": 307}
+{"timestamp": "2025-04-18 09:33:56,590", "level": "INFO", "logger": "__main__", "message": "Test suite execution completed", "module": "Email", "function": "sendemail", "line": 486}

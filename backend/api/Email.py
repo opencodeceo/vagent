@@ -49,43 +49,107 @@ class PathConfig:
     """Path configuration"""
     BASE_DIR = Path(__file__).parent
     CREDENTIALS_PATH = BASE_DIR / './credentials.json'  
-    TOKEN_PATH = BASE_DIR / './token.json'  
+    TOKEN_PATH = BASE_DIR / './token.json'
     LOG_CONFIG_PATH = BASE_DIR / 'logging.json'
+    LOG_FILE = BASE_DIR / 'app.log'
+    JSON_LOG_FILE = BASE_DIR / 'app.json'
 
-# Logging configuration
+# Custom JSON formatter for the app.json file
+class JsonFormatter(logging.Formatter):
+    """Formatter that outputs JSON strings after parsing the log record."""
+    def format(self, record):
+        """Format log record as JSON"""
+        log_data = {
+            "timestamp": datetime.fromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S,%f')[:-3],
+            "level": record.levelname,
+            "logger": record.name,
+            "message": record.getMessage(),
+            "module": record.module,
+            "function": record.funcName,
+            "line": record.lineno,
+        }
+        
+        # Add exception info if present
+        if record.exc_info:
+            log_data["exception"] = self.formatException(record.exc_info)
+            
+        return json.dumps(log_data)
+
+# Tabular formatter for the app.log file
+class TabularFormatter(logging.Formatter):
+    """Formatter that outputs log records in a clean tabular format."""
+    def __init__(self):
+        # Define format with fixed column widths
+        fmt = "%(asctime)s | %(levelname)-8s | %(name)-20s | %(message)s"
+        super().__init__(fmt=fmt, datefmt='%Y-%m-%d %H:%M:%S')
+    
+    def formatException(self, exc_info):
+        """Format exception information as indented text."""
+        result = super().formatException(exc_info)
+        return '    ' + result.replace('\n', '\n    ')
+    
+    def format(self, record):
+        """Format log record with exception info properly indented."""
+        formatted = super().format(record)
+        if record.exc_info:
+            # Add a separator line before exception info
+            formatted += '\n    ----------------------------------------'
+        return formatted
+
+# Enhanced logging configuration
 def setup_logging() -> None:
-    """Configure logging with rotation and proper formatting"""
+    """Configure logging with both JSON and tabular formats."""
+    # Create necessary directories
+    Path(PathConfig.LOG_FILE).parent.mkdir(exist_ok=True)
+    
+    # Configure logging
     logging.config.dictConfig({
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
-            'standard': {
-                'format': '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+            'tabular': {
+                '()': TabularFormatter,
+            },
+            'json': {
+                '()': JsonFormatter,
             },
         },
         'handlers': {
-            'default': {
+            'console': {
                 'level': 'INFO',
-                'formatter': 'standard',
+                'formatter': 'tabular',
                 'class': 'logging.StreamHandler',
             },
             'file': {
                 'level': 'INFO',
-                'formatter': 'standard',
+                'formatter': 'tabular',
                 'class': 'logging.handlers.RotatingFileHandler',
-                'filename': 'app.log',
+                'filename': str(PathConfig.LOG_FILE),
                 'maxBytes': 10485760,  # 10MB
                 'backupCount': 5,
-            }
+                'encoding': 'utf8',
+            },
+            'json_file': {
+                'level': 'INFO',
+                'formatter': 'json',
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': str(PathConfig.JSON_LOG_FILE),
+                'maxBytes': 10485760,  # 10MB
+                'backupCount': 5,
+                'encoding': 'utf8',
+            },
         },
         'loggers': {
             '': {  # root logger
-                'handlers': ['default', 'file'],
+                'handlers': ['console', 'file', 'json_file'],
                 'level': 'INFO',
                 'propagate': True
             }
         }
     })
+    
+    logger = logging.getLogger(__name__)
+    logger.info("Logging system initialized with tabular and JSON formats")
 
 logger = logging.getLogger(__name__)
 
@@ -421,8 +485,6 @@ def sendemail():
     finally:
         logger.info("Test suite execution completed")
 
-
-        
 
 if __name__ == "__main__":
     sendemail()

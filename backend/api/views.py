@@ -1,3 +1,124 @@
+# filepath: /home/opencode/vagent/backend/api/views.py
 from django.shortcuts import render
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
+import asyncio
+import json
 
-# Create your views here.
+# Import our AIService and other tools
+from .Email import AIService
+from .Call import initialize_ai_service, send_email_tool
+
+# Initialize the AI service once for the whole application
+ai_service_instance = None
+
+async def get_ai_service():
+    """Get or initialize the AI service instance"""
+    global ai_service_instance
+    if ai_service_instance is None:
+        ai_service_instance = await initialize_ai_service()
+    return ai_service_instance
+
+
+@api_view(['POST'])
+def send_email_api(request):
+    """
+    API endpoint to send emails
+    Expects JSON data with:
+    {
+        "to": "recipient@example.com",
+        "subject": "Email Subject",
+        "body": "Email Body"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required fields
+        required_fields = ['to', 'subject', 'body']
+        for field in required_fields:
+            if field not in data:
+                return Response(
+                    {'error': f'Missing required field: {field}'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        # Run the email sending function asynchronously
+        loop = asyncio.get_event_loop()
+        result = loop.run_until_complete(
+            send_email_tool(
+                to=data['to'],
+                subject=data['subject'],
+                body=data['body']
+            )
+        )
+        
+        # Check if the result contains an error message
+        if "Error:" in result or "Failed to send email" in result or "unexpected error" in result:
+            return Response({'error': result}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response({'success': True, 'message': result}, status=status.HTTP_200_OK)
+    
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['GET'])
+def health_check(request):
+    """Simple health check endpoint"""
+    return Response({'status': 'ok'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
+def process_voice_command(request):
+    """
+    Process a voice command transcription and decide what action to take
+    Expects JSON data with:
+    {
+        "text": "transcribed voice command"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+        
+        # Validate required field
+        if 'text' not in data:
+            return Response(
+                {'error': 'Missing required field: text'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        text = data['text'].lower()
+        
+        # Simple keyword-based logic to decide if this is an email command
+        email_keywords = [
+            'send an email', 'send email', 'write an email', 'compose an email',
+            'email to', 'send a message', 'write a message', 'compose a message'
+        ]
+        
+        is_email_request = any(keyword in text for keyword in email_keywords)
+        
+        if is_email_request:
+            # For now just return that we detected an email request
+            # In a more advanced implementation, we could extract recipient, subject, etc.
+            return Response({
+                'action': 'email',
+                'detected': True,
+                'message': 'Email request detected. Please provide recipient, subject, and body.'
+            })
+        else:
+            # Not an email request, could be handled by other AI functions
+            return Response({
+                'action': 'other',
+                'detected': False,
+                'message': 'No specific action detected. Processing as general query.'
+            })
+            
+    except json.JSONDecodeError:
+        return Response({'error': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

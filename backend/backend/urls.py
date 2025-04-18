@@ -18,17 +18,23 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import JsonResponse
 
-def api_overview(request):
-    """Provide an overview of available API endpoints."""
+# Root view function to welcome users
+def welcome(request):
     return JsonResponse({
-        "admin": "/admin/",
-        "health_check": "/api/health/",
-        "send_email": "/api/send-email/",
-        "process_voice_command": "/api/process-voice-command/",
+        'message': 'Welcome to the Voice Agent API',
+        'status': 'Server is running correctly',
+        'endpoints': {
+            'admin': '/admin/',
+            'api': '/api/',
+            'api_root': '/api/',
+            'health_check': '/api/health/',
+            'send_email': '/api/send-email/',
+            'voice_command': '/api/process-voice-command/'
+        }
     })
 
 urlpatterns = [
-    path('', api_overview, name='api_overview'),
+    path('', welcome, name='welcome'),  # Root URL pattern
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),
 ]

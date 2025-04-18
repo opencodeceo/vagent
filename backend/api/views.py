@@ -45,15 +45,31 @@ def send_email_api(request):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         
-        # Run the email sending function asynchronously
-        loop = asyncio.get_event_loop()
-        result = loop.run_until_complete(
-            send_email_tool(
-                to=data['to'],
-                subject=data['subject'],
-                body=data['body']
+        # Use asyncio.run() to execute the async function
+        try:
+            result = asyncio.run(
+                send_email_tool(
+                    to=data['to'],
+                    subject=data['subject'],
+                    body=data['body']
+                )
             )
-        )
+        except RuntimeError as e:
+            # Handle cases where asyncio.run() cannot be used (e.g., nested loops)
+            # Fallback to creating a new loop if necessary, though asyncio.run is preferred
+            if "cannot be called from a running event loop" in str(e):
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                result = loop.run_until_complete(
+                    send_email_tool(
+                        to=data['to'],
+                        subject=data['subject'],
+                        body=data['body']
+                    )
+                )
+                loop.close()
+            else:
+                raise e # Re-raise other runtime errors
         
         # Check if the result contains an error message
         if "Error:" in result or "Failed to send email" in result or "unexpected error" in result:
@@ -64,6 +80,10 @@ def send_email_api(request):
     except json.JSONDecodeError:
         return Response({'error': 'Invalid JSON data'}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
+        # Log the exception for debugging
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in send_email_api: {e}", exc_info=True)
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 

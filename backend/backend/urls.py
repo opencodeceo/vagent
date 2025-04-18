@@ -16,8 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+def api_overview(request):
+    """Provide an overview of available API endpoints."""
+    return JsonResponse({
+        "admin": "/admin/",
+        "health_check": "/api/health/",
+        "send_email": "/api/send-email/",
+        "process_voice_command": "/api/process-voice-command/",
+    })
 
 urlpatterns = [
+    path('', api_overview, name='api_overview'),
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),  # Include our API routes
+    path('api/', include('api.urls')),
 ]

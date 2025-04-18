@@ -56,9 +56,9 @@ export default function Home() {
     <div className="container mx-auto p-4 space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Gemini Talk</CardTitle>
+          <CardTitle>Granteri 🌓</CardTitle>
           <CardDescription>
-            Draft emails and generate call scripts with Gemini.
+            Draft emails and generate call scripts with Granteri🌓.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -46,7 +46,6 @@ async def entrypoint(ctx: agents.JobContext):
             keywords=[("LiveKit", 1.5)],
             language="en-US",
    ),
-        
     )
 
     await session.start(

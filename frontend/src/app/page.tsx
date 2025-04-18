@@ -53,34 +53,37 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <Card>
-        <CardHeader>
-          <CardTitle>Granteri 🌓</CardTitle>
-          <CardDescription>
-            Draft emails and generate call scripts with Granteri🌓.
-          </CardDescription>
+    <div className="container">
+      <Card className="hover-card">
+        <CardHeader className="card-header">
+          <h1 className="granteri-title">
+            Granteri <span className="moon-icon">🌓</span>
+          </h1>
+          <p className="hero-description">
+            Draft emails and generate call scripts with Granteri 🌓. Enhance
+            your communication with AI-powered assistance.
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="prompt">Prompt</Label>
+        <CardContent className="card-content">
+          <div className="input-group">
+            <Label htmlFor="prompt" className="input-label">
+              Prompt
+            </Label>
             <Input
               id="prompt"
-              placeholder="Enter your prompt here"
+              placeholder="Describe what you want to create..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
+              className="shine-placeholder"
             />
           </div>
-          <div className="flex space-x-2">
-            <Button
-              onClick={handleDraftEmail}
-              className="bg-primary text-primary-foreground hover:bg-primary/80 rounded-md"
-            >
+          <div className="btn-group">
+            <Button onClick={handleDraftEmail} className="btn btn-primary">
               Draft Email
             </Button>
             <Button
               onClick={handleGenerateCallScript}
-              className="bg-primary text-primary-foreground hover:bg-primary/80 rounded-md"
+              className="btn btn-secondary"
             >
               Generate Call Script
             </Button>
@@ -88,39 +91,45 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover-card">
         <CardHeader>
-          <CardTitle>Email Draft</CardTitle>
-          <CardDescription>
+          <h2 className="section-header">Email Draft</h2>
+          <p className="section-description">
             View and edit the generated email draft.
-          </CardDescription>
+          </p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="recipient">Recipient</Label>
+        <CardContent className="card-content">
+          <div className="input-group">
+            <Label htmlFor="recipient" className="input-label">
+              Recipient
+            </Label>
             <Input
               id="recipient"
-              placeholder="Enter recipient email"
+              placeholder="Enter recipient email address..."
               type="email"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
+              className="shine-placeholder"
             />
-            <Label htmlFor="email-draft">Email Draft</Label>
-            <Textarea
-              id="email-draft"
-              value={emailDraft}
-              onChange={(e) => setEmailDraft(e.target.value)}
-            />
+            <Label htmlFor="email-draft" className="input-label">
+              Email Content
+            </Label>
+            <div className="gradient-border">
+              <Textarea
+                id="email-draft"
+                value={emailDraft}
+                onChange={(e) => setEmailDraft(e.target.value)}
+                placeholder="Your generated email will appear here..."
+                className="shine-placeholder"
+              />
+            </div>
           </div>
-          <Button
-            disabled={true}
-            className="bg-accent text-primary-foreground hover:bg-accent/80 rounded-md"
-          >
+          <Button disabled={true} className="btn btn-accent">
             <Mail className="mr-2 h-4 w-4" />
             Send Email (Currently Unavailable)
           </Button>
           <div>
-            <p className="text-sm text-muted-foreground">
+            <p className="info-text">
               Email sending functionality is currently unavailable as it is
               being migrated to a Python backend.
             </p>
@@ -128,25 +137,28 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="hover-card">
         <CardHeader>
-          <CardTitle>Call Script</CardTitle>
-          <CardDescription>View the generated call script.</CardDescription>
+          <h2 className="section-header">Call Script</h2>
+          <p className="section-description">View the generated call script.</p>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-2">
-            <Label htmlFor="call-script">Call Script</Label>
-            <Textarea
-              id="call-script"
-              value={callScript}
-              onChange={(e) => setCallScript(e.target.value)}
-            />
+        <CardContent className="card-content">
+          <div className="input-group">
+            <Label htmlFor="call-script" className="input-label">
+              Call Script
+            </Label>
+            <div className="gradient-border">
+              <Textarea
+                id="call-script"
+                value={callScript}
+                onChange={(e) => setCallScript(e.target.value)}
+                placeholder="Your generated call script will appear here..."
+                className="shine-placeholder"
+              />
+            </div>
           </div>
-          <Button
-            onClick={handlePlaceCall}
-            className="bg-accent text-primary-foreground hover:bg-accent/80 rounded-md"
-          >
-            <Phone className="mr-2 h-4 w-4" />
+          <Button onClick={handlePlaceCall} className="btn btn-primary">
+            <span className="status-dot mr-2"></span>
             Place Call
           </Button>
         </CardContent>

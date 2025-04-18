@@ -52,7 +52,7 @@ class PathConfig:
     TOKEN_PATH = BASE_DIR / './token.json'
     LOG_CONFIG_PATH = BASE_DIR / 'logging.json'
     LOG_FILE = BASE_DIR / 'app.log'
-    JSON_LOG_FILE = BASE_DIR / 'app.json'
+    JSON_LOG_FILE = BASE_DIR / 'applog.json'
 
 # Custom JSON formatter for the app.json file
 class JsonFormatter(logging.Formatter):

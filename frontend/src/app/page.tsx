@@ -26,7 +26,7 @@ export default function Home() {
   const [callScript, setCallScript] = useState("");
   const [recipient, setRecipient] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [liveKitToken, setLiveKitToken] = useState<string | null>(null); // Added state for token
+  const [liveKitToken, setLiveKitToken] = useState<string | null>(null);
 
   const handleDraftEmail = async () => {
     const result = await draftEmail({ prompt });
@@ -81,7 +81,7 @@ export default function Home() {
     }
   };
 
-  // Function to fetch LiveKit token (now returns string|null)
+  // Function to fetch LiveKit token (returns string|null)
   const handleGetLiveKitToken = async (): Promise<string | null> => {
     try {
       const username = `user-${Math.random().toString(36).substring(7)}`;
@@ -97,16 +97,19 @@ export default function Home() {
       const data = await response.json();
       if (data.token) {
         setLiveKitToken(data.token);
-        return data.token; // <-- return token
+        console.log("LiveKit token fetched successfully.");
+        return data.token;
       } else {
+        console.error("Failed to get token from response:", data);
         alert("Failed to get LiveKit token.");
+        setLiveKitToken(null);
         return null;
       }
     } catch (error: any) {
       console.error("Error fetching LiveKit token:", error);
       alert(`Error fetching token: ${error.message}`);
       setLiveKitToken(null);
-      return null; // <-- return null on error
+      return null;
     }
   };
 
@@ -153,8 +156,7 @@ export default function Home() {
         {/* Left side: Email Form */}
         <div className="w-full md:w-1/2">
           <EmailForm initialEmailDraft={emailDraft} />
-          {/* Add the Voice Command Button below the form */}
-          {/* Pass the token fetching function to the button */}
+          {/* Pass the token fetching function */}
           <VoiceCommandButton onGetToken={handleGetLiveKitToken} />
         </div>
 

@@ -149,44 +149,9 @@ def process_voice_command(request):
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-@csrf_exempt # Use csrf_exempt for simplicity in this example, consider proper CSRF handling for production
-# def generate_livekit_token(request):
-#     if not settings.LIVEKIT_API_KEY or not settings.LIVEKIT_API_SECRET:
-#         return JsonResponse({'error': 'LiveKit API key or secret not configured'}, status=500)
 
-#     room_name = request.GET.get('room', 'default-voice-room')
-#     username = request.GET.get('username', 'anonymous-user')
-    
-#     try:
-#         # Create a LiveKit access token
-#         token = api.AccessToken(os.getenv('LIVEKIT_API_KEY'), os.getenv('LIVEKIT_API_SECRET')) \
-#             .with_identity("identity") \
-#             .with_name("name") \
-#             .with_grants(api.VideoGrants(
-#                 room_join=True,
-#                 room="my-room",
-#             )).to_jwt()
-        
-#         # Define grant permissions for the token
-#         grant = api.VideoGrant(room_join=True, room=room_name)
-        
-#         # Set identity and name (can be customized)
-#         token.identity = username
-#         token.name = username
-#         token.add_grant(grant)
-        
-#         # Generate the JWT token string
-        
-#         return JsonResponse({
-#             'token': token,
-#             'room': room_name,
-#             'username': username
-#         })
-#     except Exception as e:
-#         print(f"Error generating LiveKit token: {e}")
-#         return JsonResponse({'error': 'Failed to generate LiveKit token'}, status=500)
-
-
+@csrf_exempt
+@api_view(['GET'])
 def generate_livekit_token(request):
     token = api.AccessToken(os.getenv('LIVEKIT_API_KEY'), os.getenv('LIVEKIT_API_SECRET')) \
     .with_identity("identity") \
@@ -195,4 +160,8 @@ def generate_livekit_token(request):
         room_join=True,
         room="my-room",
     )).to_jwt()
-    return token
+    return JsonResponse({
+        'token': token,
+        'room': "my-room",
+        'username': "name"
+    })

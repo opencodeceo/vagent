@@ -45,26 +45,17 @@ export async function fetchLiveKitToken(
   participantName: string = "user"
 ): Promise<string> {
   try {
-    // Updated to use the correct format for the backend API
     const response = await fetch(
-      `http://127.0.0.1:8000/api/livekit-token/?room=${encodeURIComponent(
-        roomName
-      )}&username=${encodeURIComponent(participantName)}`
+      `/api/livekit-token?room=${roomName}&username=${participantName}`
     );
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Token fetch failed: ${response.status}, ${errorText}`);
-      throw new Error(`Failed to fetch token: ${response.status}`);
+      throw new Error(
+        `Failed to fetch token: ${response.status} ${response.statusText}`
+      );
     }
 
     const data = await response.json();
-    console.log("Token API response:", data);
-
-    if (!data.token) {
-      throw new Error("No token in response");
-    }
-
     return data.token;
   } catch (error) {
     console.error("Error fetching LiveKit token:", error);

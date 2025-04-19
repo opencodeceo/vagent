@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+dotenv_path = Path(__file__).resolve().parent.parent / 'api' / '.env'
+load_dotenv(dotenv_path)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,6 +36,11 @@ ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 # CORS settings
 CORS_ALLOW_ALL_ORIGINS = True  # For development only
 CORS_ALLOW_CREDENTIALS = True
+
+# LiveKit configuration
+LIVEKIT_API_KEY = os.environ.get('LIVEKIT_API_KEY')
+LIVEKIT_API_SECRET = os.environ.get('LIVEKIT_API_SECRET')
+LIVEKIT_URL = os.environ.get('LIVEKIT_URL', 'wss://grant-gqi9u97k.livekit.cloud')
 
 # Application definition
 

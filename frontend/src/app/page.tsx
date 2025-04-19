@@ -17,6 +17,8 @@ import { sendEmail } from "@/services/email";
 import { placeCall } from "@/services/livekit";
 import { useState } from "react";
 import { Mail, Phone } from "lucide-react";
+import EmailForm from "@/components/EmailForm";
+import { VoiceCommandButton } from "@/components/VoiceCommandButton";
 
 export default function Home() {
   const [prompt, setPrompt] = useState("");
@@ -122,78 +124,46 @@ export default function Home() {
         </CardContent>
       </Card>
 
-      <Card className="hover-card">
-        <CardHeader>
-          <h2 className="section-header">Email Draft</h2>
-          <p className="section-description">
-            View, edit, and send the generated email draft.
-          </p>
-        </CardHeader>
-        <CardContent className="card-content">
-          <div className="input-group">
-            <Label htmlFor="recipient" className="input-label">
-              Recipient
-            </Label>
-            <Input
-              id="recipient"
-              placeholder="Enter recipient email address..."
-              type="email"
-              value={recipient}
-              onChange={(e) => setRecipient(e.target.value)}
-              className="shine-placeholder"
-              required
-            />
-            <Label htmlFor="email-draft" className="input-label">
-              Email Content (Edit if needed)
-            </Label>
-            <div className="gradient-border">
-              <Textarea
-                id="email-draft"
-                value={emailDraft}
-                onChange={(e) => setEmailDraft(e.target.value)}
-                placeholder="Your generated email will appear here..."
-                className="shine-placeholder"
-                rows={10}
-              />
-            </div>
-          </div>
-          <Button
-            onClick={handleSendEmail}
-            disabled={isSendingEmail || !recipient || !emailDraft}
-            className="btn btn-accent w-full mt-4"
-          >
-            <Mail className="mr-2 h-4 w-4" />
-            {isSendingEmail ? "Sending..." : "Send Email"}
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col md:flex-row gap-8 p-4 md:p-8">
+        {/* Left side: Email Form */}
+        <div className="w-full md:w-1/2">
+          <EmailForm />
+          {/* Add the Voice Command Button below the form */}
+          <VoiceCommandButton />
+        </div>
 
-      <Card className="hover-card">
-        <CardHeader>
-          <h2 className="section-header">Call Script</h2>
-          <p className="section-description">View the generated call script.</p>
-        </CardHeader>
-        <CardContent className="card-content">
-          <div className="input-group">
-            <Label htmlFor="call-script" className="input-label">
-              Call Script
-            </Label>
-            <div className="gradient-border">
-              <Textarea
-                id="call-script"
-                value={callScript}
-                onChange={(e) => setCallScript(e.target.value)}
-                placeholder="Your generated call script will appear here..."
-                className="shine-placeholder"
-              />
-            </div>
-          </div>
-          <Button onClick={handlePlaceCall} className="btn btn-primary">
-            <span className="status-dot mr-2"></span>
-            Place Call
-          </Button>
-        </CardContent>
-      </Card>
+        {/* Right side: Call Section */}
+        <div className="w-full md:w-1/2">
+          <Card className="hover-card">
+            <CardHeader>
+              <h2 className="section-header">Call Script</h2>
+              <p className="section-description">
+                View the generated call script.
+              </p>
+            </CardHeader>
+            <CardContent className="card-content">
+              <div className="input-group">
+                <Label htmlFor="call-script" className="input-label">
+                  Call Script
+                </Label>
+                <div className="gradient-border">
+                  <Textarea
+                    id="call-script"
+                    value={callScript}
+                    onChange={(e) => setCallScript(e.target.value)}
+                    placeholder="Your generated call script will appear here..."
+                    className="shine-placeholder"
+                  />
+                </div>
+              </div>
+              <Button onClick={handlePlaceCall} className="btn btn-primary">
+                <span className="status-dot mr-2"></span>
+                Place Call
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

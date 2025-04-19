@@ -1,4 +1,5 @@
 // filepath: /home/opencode/vagent/frontend/src/services/voice.ts
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Room,
   RoomEvent,
@@ -8,8 +9,9 @@ import {
   ConnectionQuality,
   Track,
   createLocalAudioTrack,
+  DataPacket_Kind,
+  Participant,
 } from "livekit-client";
-import { useState, useEffect, useCallback } from "react";
 
 // Configure LiveKit connection options
 const LIVEKIT_URL =
@@ -116,32 +118,49 @@ export function createVoiceCommandService() {
       console.log("Connected to LiveKit room:", room.name);
     });
 
-    room.on(RoomEvent.Disconnected, () => {
+    room.on(RoomEvent.Disconnected, (reason) => {
       state = { ...state, isConnected: false, isListening: false };
-      console.log("Disconnected from LiveKit room");
+      console.log("Disconnected from LiveKit room, reason:", reason);
+      // Handle disconnection errors if needed
+      if (reason && options.onError) {
+        options.onError(new Error(`Disconnected: ${reason}`));
+      }
     });
 
     room.on(
       RoomEvent.ConnectionQualityChanged,
-      (quality: ConnectionQuality) => {
-        state = { ...state, connectionQuality: quality };
+      (quality: ConnectionQuality, participant?: Participant) => {
+        if (participant === room.localParticipant) {
+          state = { ...state, connectionQuality: quality };
+        }
       }
     );
 
-    room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-      // Handle any transcription tracks that might come from the server
-      if (track.kind === Track.Kind.Data) {
-        // Assume data track contains transcript data
-        // Implementation would depend on how your backend sends transcript data
-      }
-    });
+    // Use DataReceived for transcriptions/commands sent via data channel
+    room.on(
+      RoomEvent.DataReceived,
+      (
+        payload: Uint8Array,
+        participant?: RemoteParticipant,
+        kind?: DataPacket_Kind
+      ) => {
+        const decoder = new TextDecoder();
+        const message = decoder.decode(payload);
+        console.log("Data received:", message, "from", participant?.identity);
 
-    room.on(RoomEvent.Error, (error) => {
-      state = { ...state, error };
-      if (options.onError) {
-        options.onError(error);
+        try {
+          const data = JSON.parse(message);
+          // Assuming backend sends transcript/command data in JSON format
+          if (data.type === "transcript" && options.onTranscript) {
+            options.onTranscript(data.text);
+          } else if (data.type === "command" && options.onCommandDetected) {
+            options.onCommandDetected(data.command);
+          }
+        } catch (e) {
+          console.error("Failed to parse data message:", e);
+        }
       }
-    });
+    );
   };
 
   // Connect to the LiveKit room

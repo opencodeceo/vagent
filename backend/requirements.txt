@@ -25,3 +25,4 @@ python-dateutil
 structlog
 asyncio
 gunicorn
+livekit-server-sdk

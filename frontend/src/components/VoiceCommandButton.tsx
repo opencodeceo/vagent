@@ -7,7 +7,13 @@ import { useVoiceCommand } from "@/services/voice";
 import { sendEmail } from "@/services/email";
 import { useToast } from "@/hooks/use-toast";
 
-export function VoiceCommandButton() {
+// Define props type to include onGetToken
+interface VoiceCommandButtonProps {
+  onGetToken?: () => Promise<string | null>; // Optional function prop
+}
+
+export function VoiceCommandButton({ onGetToken }: VoiceCommandButtonProps) {
+  // Destructure onGetToken
   const { toast } = useToast();
   const [transcript, setTranscript] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -70,13 +76,24 @@ export function VoiceCommandButton() {
 
   const toggleListening = async () => {
     try {
+      // fetch token and pass it into connect
+      const token = onGetToken ? await onGetToken() : null;
+
       if (!isConnected) {
-        await connect(); // Connect if not already connected
+        await connect({ token: token || undefined }); // <-- pass token
       }
-      if (isListening) {
-        await stopListening();
+      if (isConnected) {
+        if (isListening) {
+          await stopListening();
+        } else {
+          await startListening();
+        }
       } else {
-        await startListening();
+        toast({
+          title: "Connection Failed",
+          description: "Could not connect after fetching token.",
+          variant: "destructive",
+        });
       }
     } catch (err: any) {
       // Explicitly type err as any or Error

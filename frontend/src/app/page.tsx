@@ -14,6 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { draftEmail } from "@/ai/flows/draft-email";
 import { generateCallScript } from "@/ai/flows/generate-call-script";
 import { sendEmail } from "@/services/email";
+// import { placeCall } from "@/services/livekit";
 import { useState } from "react";
 import { Mail, Phone } from "lucide-react";
 import EmailForm from "@/components/EmailForm";
@@ -25,6 +26,7 @@ export default function Home() {
   const [callScript, setCallScript] = useState("");
   const [recipient, setRecipient] = useState("");
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [liveKitToken, setLiveKitToken] = useState<string | null>(null); // Added state for token
 
   const handleDraftEmail = async () => {
     const result = await draftEmail({ prompt });
@@ -79,6 +81,35 @@ export default function Home() {
     }
   };
 
+  // Function to fetch LiveKit token (now returns string|null)
+  const handleGetLiveKitToken = async (): Promise<string | null> => {
+    try {
+      const username = `user-${Math.random().toString(36).substring(7)}`;
+      const room = "voice-command-room";
+      const url = new URL("http://127.0.0.1:8000/api/livekit-token/");
+      url.searchParams.append("username", username);
+      url.searchParams.append("room", room);
+
+      const response = await fetch(url.toString(), { method: "GET" });
+      if (!response.ok) {
+        throw new Error(`status: ${response.status}`);
+      }
+      const data = await response.json();
+      if (data.token) {
+        setLiveKitToken(data.token);
+        return data.token; // <-- return token
+      } else {
+        alert("Failed to get LiveKit token.");
+        return null;
+      }
+    } catch (error: any) {
+      console.error("Error fetching LiveKit token:", error);
+      alert(`Error fetching token: ${error.message}`);
+      setLiveKitToken(null);
+      return null; // <-- return null on error
+    }
+  };
+
   return (
     <div className="container">
       <Card className="hover-card">
@@ -121,9 +152,10 @@ export default function Home() {
       <div className="flex flex-col md:flex-row gap-8 p-4 md:p-8">
         {/* Left side: Email Form */}
         <div className="w-full md:w-1/2">
-          <EmailForm />
+          <EmailForm initialEmailDraft={emailDraft} />
           {/* Add the Voice Command Button below the form */}
-          <VoiceCommandButton />
+          {/* Pass the token fetching function to the button */}
+          <VoiceCommandButton onGetToken={handleGetLiveKitToken} />
         </div>
 
         {/* Right side: Call Section */}
@@ -150,6 +182,7 @@ export default function Home() {
                   />
                 </div>
               </div>
+              {/* Place Call button removed since handlePlaceCall doesn't exist */}
             </CardContent>
           </Card>
         </div>

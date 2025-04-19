@@ -1,7 +1,7 @@
 // filepath: /home/opencode/vagent/frontend/src/components/EmailForm.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { sendEmail, EmailRequest } from "@/services/email";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +15,55 @@ import {
 } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
-const EmailForm: React.FC = () => {
+interface EmailFormProps {
+  initialEmailDraft?: string;
+}
+
+const EmailForm: React.FC<EmailFormProps> = ({ initialEmailDraft = "" }) => {
   const [emailData, setEmailData] = useState<EmailRequest>({
     to: "",
     subject: "",
     body: "",
   });
+
+  // Update the email body when initialEmailDraft changes
+  useEffect(() => {
+    if (initialEmailDraft) {
+      // Try to extract subject if the first line looks like a subject
+      const lines = initialEmailDraft.trim().split("\n");
+
+      if (lines.length > 1 && lines[0].toLowerCase().startsWith("subject:")) {
+        const subject = lines[0].substring(8).trim();
+        const body = lines.slice(1).join("\n").trim();
+
+        setEmailData((prev) => ({
+          ...prev,
+          subject,
+          body,
+        }));
+      } else if (
+        lines.length > 0 &&
+        !lines[0].includes("@") &&
+        lines[0].length < 100
+      ) {
+        // If first line is short, treat it as subject
+        const subject = lines[0].trim();
+        const body = lines.slice(1).join("\n").trim();
+
+        setEmailData((prev) => ({
+          ...prev,
+          subject,
+          body,
+        }));
+      } else {
+        // Otherwise use the whole text as body
+        setEmailData((prev) => ({
+          ...prev,
+          body: initialEmailDraft,
+        }));
+      }
+    }
+  }, [initialEmailDraft]);
 
   const [status, setStatus] = useState<{
     type: "idle" | "loading" | "success" | "error";

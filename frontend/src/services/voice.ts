@@ -45,17 +45,26 @@ export async function fetchLiveKitToken(
   participantName: string = "user"
 ): Promise<string> {
   try {
+    // Updated to use the correct format for the backend API
     const response = await fetch(
-      `/api/livekit-token?room=${roomName}&username=${participantName}`
+      `http://127.0.0.1:8000/api/livekit-token/?room=${encodeURIComponent(
+        roomName
+      )}&username=${encodeURIComponent(participantName)}`
     );
 
     if (!response.ok) {
-      throw new Error(
-        `Failed to fetch token: ${response.status} ${response.statusText}`
-      );
+      const errorText = await response.text();
+      console.error(`Token fetch failed: ${response.status}, ${errorText}`);
+      throw new Error(`Failed to fetch token: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("Token API response:", data);
+
+    if (!data.token) {
+      throw new Error("No token in response");
+    }
+
     return data.token;
   } catch (error) {
     console.error("Error fetching LiveKit token:", error);
@@ -165,19 +174,25 @@ export function createVoiceCommandService() {
 
   // Connect to the LiveKit room
   const connect = async (opts: VoiceCommandOptions) => {
-    options = { ...opts };
+    options = { ...opts }; // Store options including the potential token
     state = { ...state, isConnecting: true, error: null };
 
     try {
       const roomName = opts.roomName || "voice-command";
       const participantName = opts.participantName || "user";
+
+      // Use the provided token if available, otherwise fetch it (fallback)
       const token =
         opts.token || (await fetchLiveKitToken(roomName, participantName));
+
+      if (!token) {
+        throw new Error("LiveKit token is missing or could not be fetched.");
+      }
 
       // Set up room listeners before connecting
       setupRoomListeners();
 
-      // Connect to the room
+      // Connect to the room using the obtained token
       await room.connect(LIVEKIT_URL, token);
 
       // Pre-warm the microphone permission
@@ -185,11 +200,17 @@ export function createVoiceCommandService() {
         await room.localParticipant.setMicrophoneEnabled(false);
       }
 
+      // Update state after successful connection
+      state = { ...state, isConnected: true, isConnecting: false };
+      console.log("Successfully connected to LiveKit room:", room.name);
+
       return true;
     } catch (error: any) {
+      console.error("Failed to connect to LiveKit:", error); // Log the specific error
       state = {
         ...state,
         isConnecting: false,
+        isConnected: false, // Ensure isConnected is false on error
         error,
       };
 
@@ -308,21 +329,30 @@ export function useVoiceCommand(options: VoiceCommandOptions = {}) {
     };
   }, []);
 
-  const connect = useCallback(async () => {
-    if (!serviceRef.current) return false;
-    setState((prev) => ({ ...prev, isConnecting: true }));
+  const connect = useCallback(
+    async (connectOpts?: { token?: string }) => {
+      // Allow passing token directly
+      if (!serviceRef.current) return false;
+      setState((prev) => ({ ...prev, isConnecting: true }));
 
-    const success = await serviceRef.current.connect(options);
+      // Merge hook options with any options passed directly to connect (like the token)
+      const finalOptions = { ...options, ...connectOpts };
 
-    setState((prev) => ({
-      ...prev,
-      isConnecting: false,
-      isConnected: success,
-      error: success ? null : new Error("Failed to connect"),
-    }));
+      const success = await serviceRef.current.connect(finalOptions);
 
-    return success;
-  }, [options]);
+      // Update state based on the service's internal state after connection attempt
+      const serviceState = serviceRef.current.getState();
+      setState((prev) => ({
+        ...prev,
+        isConnecting: serviceState.isConnecting,
+        isConnected: serviceState.isConnected,
+        error: serviceState.error,
+      }));
+
+      return success;
+    },
+    [options]
+  ); // Dependency array includes hook options
 
   const disconnect = useCallback(async () => {
     if (!serviceRef.current) return false;
@@ -340,19 +370,36 @@ export function useVoiceCommand(options: VoiceCommandOptions = {}) {
 
   const startListening = useCallback(async () => {
     if (!serviceRef.current) return false;
-    if (!state.isConnected) {
-      await connect();
+
+    // Ensure connection exists before starting to listen
+    let currentIsConnected = state.isConnected;
+    if (!currentIsConnected) {
+      // Attempt connection if not connected.
+      // Note: Token should ideally be fetched *before* this by the button's onGetToken
+      const connected = await connect(); // Use the connect callback from the hook
+      currentIsConnected = connected; // Update connection status
     }
 
-    const success = await serviceRef.current.startListening();
-
-    setState((prev) => ({
-      ...prev,
-      isListening: success,
-    }));
-
-    return success;
-  }, [state.isConnected, connect]);
+    // Proceed only if connected
+    if (currentIsConnected) {
+      const success = await serviceRef.current.startListening();
+      setState((prev) => ({
+        ...prev,
+        isListening: success,
+        error: success ? null : prev.error, // Clear error if successful, otherwise keep existing
+      }));
+      return success;
+    } else {
+      // Handle case where connection failed before starting to listen
+      setState((prev) => ({
+        ...prev,
+        isListening: false, // Ensure listening is false
+        error:
+          prev.error || new Error("Cannot start listening: Connection failed."),
+      }));
+      return false;
+    }
+  }, [state.isConnected, connect]); // Depend on isConnected and connect
 
   const stopListening = useCallback(async () => {
     if (!serviceRef.current) return false;

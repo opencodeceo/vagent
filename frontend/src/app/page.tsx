@@ -14,7 +14,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { draftEmail } from "@/ai/flows/draft-email";
 import { generateCallScript } from "@/ai/flows/generate-call-script";
 import { sendEmail } from "@/services/email";
-import { placeCall } from "@/services/livekit";
 import { useState } from "react";
 import { Mail, Phone } from "lucide-react";
 import EmailForm from "@/components/EmailForm";
@@ -78,11 +77,6 @@ export default function Home() {
     } finally {
       setIsSendingEmail(false);
     }
-  };
-
-  const handlePlaceCall = async () => {
-    const result = await placeCall("123-456-7890", callScript);
-    alert(`Call placed: ${result.status}`);
   };
 
   return (
@@ -156,10 +150,6 @@ export default function Home() {
                   />
                 </div>
               </div>
-              <Button onClick={handlePlaceCall} className="btn btn-primary">
-                <span className="status-dot mr-2"></span>
-                Place Call
-              </Button>
             </CardContent>
           </Card>
         </div>

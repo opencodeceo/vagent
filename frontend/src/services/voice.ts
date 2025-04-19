@@ -15,7 +15,7 @@ import {
 
 // Configure LiveKit connection options
 const LIVEKIT_URL =
-  process.env.NEXT_PUBLIC_LIVEKIT_URL || "ws://localhost:7880";
+  process.env.NEXT_PUBLIC_LIVEKIT_URL || "wss://grant-gqi9u97k.livekit.cloud";
 
 interface VoiceCommandOptions {
   roomName?: string;

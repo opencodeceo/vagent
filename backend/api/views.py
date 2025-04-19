@@ -153,15 +153,17 @@ def process_voice_command(request):
 @csrf_exempt
 @api_view(['GET'])
 def generate_livekit_token(request):
+    room = request.GET.get('room', 'my-room')
+    username = request.GET.get('username', 'Evidence Ejimone')
     token = api.AccessToken(os.getenv('LIVEKIT_API_KEY'), os.getenv('LIVEKIT_API_SECRET')) \
-    .with_identity("identity") \
-    .with_name("name") \
-    .with_grants(api.VideoGrants(
-        room_join=True,
-        room="my-room",
-    )).to_jwt()
+        .with_identity(username) \
+        .with_name(username) \
+        .with_grants(api.VideoGrants(
+            room_join=True,
+            room=room,
+        )).to_jwt()
     return JsonResponse({
         'token': token,
-        'room': "my-room",
-        'username': "name"
+        'room': room,
+        'username': username
     })

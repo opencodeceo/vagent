@@ -1,0 +1,5 @@
+{
+	"dependencies": {
+		"krisp": "link:@livekit/components-react/krisp"
+	}
+}

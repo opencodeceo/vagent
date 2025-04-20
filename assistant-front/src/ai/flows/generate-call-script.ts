@@ -7,23 +7,19 @@
  * - GenerateCallScriptInput - The input type for the generateCallScript function.
  * - GenerateCallScriptOutput - The return type for the generateCallScript function.
  */
-
-import { ai } from "@/ai/ai-instance";
+// import { ai } from "@/ai/ai-instance";
 import { z } from "genkit";
+import { ai } from "../../../ai/ai-instance";
 
 const GenerateCallScriptInputSchema = z.object({
   topic: z.string().describe("The topic or goal of the phone call."),
 });
-export type GenerateCallScriptInput = z.infer<
-  typeof GenerateCallScriptInputSchema
->;
+export type GenerateCallScriptInput = z.infer<typeof GenerateCallScriptInputSchema>;
 
 const GenerateCallScriptOutputSchema = z.object({
   script: z.string().describe("The generated script for the phone call."),
 });
-export type GenerateCallScriptOutput = z.infer<
-  typeof GenerateCallScriptOutputSchema
->;
+export type GenerateCallScriptOutput = z.infer<typeof GenerateCallScriptOutputSchema>;
 
 export async function generateCallScript(
   input: GenerateCallScriptInput

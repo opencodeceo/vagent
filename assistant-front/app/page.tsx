@@ -106,7 +106,6 @@ function ControlBar() {
 
   return (
     <div className="relative h-[100px]">
-      {/* <Home /> */}
       <AnimatePresence>
         {agentState !== "disconnected" && agentState !== "connecting" && (
           <motion.div
@@ -132,6 +131,7 @@ function ControlBar() {
           </motion.div>
         )}
       </AnimatePresence>
+      <Home />
     </div>
   );
 }

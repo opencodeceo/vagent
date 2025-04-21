@@ -14,7 +14,7 @@ import { sendEmail } from "../services/email";
 
 // import { placeCall } from "/services/livekit";
 
-export default function Home() {
+export default function AgentTasks() {
   const [prompt, setPrompt] = useState("");
   const [emailDraft, setEmailDraft] = useState("");
   const [callScript, setCallScript] = useState("");
@@ -75,7 +75,7 @@ export default function Home() {
       <Card>
         <CardHeader>
           <CardTitle>GRANTERI </CardTitle>
-          <CardDescription>Draft emails and generate call scripts with Granteri.</CardDescription>
+          <CardDescription>Draft emails and generate call scripts with Gemini.</CardDescription>
         </CardHeader>
         <CardContent className="card-content">
           <div className="input-group">

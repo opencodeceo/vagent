@@ -16,7 +16,6 @@ import { CloseIcon } from "../components/CloseIcon";
 import { NoAgentNotification } from "../components/NoAgentNotification";
 import TranscriptionView from "../components/TranscriptionView";
 import type { ConnectionDetails } from "./api/connection-details/route";
-import Home from "./interactivePage";
 
 export default function Page() {
   const [room] = useState(new Room());
@@ -131,7 +130,6 @@ function ControlBar() {
           </motion.div>
         )}
       </AnimatePresence>
-      <Home />
     </div>
   );
 }

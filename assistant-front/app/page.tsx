@@ -16,6 +16,7 @@ import { CloseIcon } from "../components/CloseIcon";
 import { NoAgentNotification } from "../components/NoAgentNotification";
 import TranscriptionView from "../components/TranscriptionView";
 import type { ConnectionDetails } from "./api/connection-details/route";
+import Home from "./interactivePage";
 
 export default function Page() {
   const [room] = useState(new Room());
@@ -105,6 +106,7 @@ function ControlBar() {
 
   return (
     <div className="relative h-[100px]">
+      {/* <Home /> */}
       <AnimatePresence>
         {agentState !== "disconnected" && agentState !== "connecting" && (
           <motion.div

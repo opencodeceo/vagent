@@ -1,4 +1,5 @@
 "use server";
+
 /**
  * @fileOverview Drafts an email based on a user-provided prompt.
  *
@@ -6,14 +7,12 @@
  * - DraftEmailInput - The input type for the draftEmail function.
  * - DraftEmailOutput - The return type for the draftEmail function.
  */
-
-import { ai } from "@/ai/ai-instance";
+// import { ai } from "@/ai/ai-instance";
 import { z } from "genkit";
+import { ai } from "../../../ai/ai-instance";
 
 const DraftEmailInputSchema = z.object({
-  prompt: z
-    .string()
-    .describe("The prompt describing the desired email content."),
+  prompt: z.string().describe("The prompt describing the desired email content."),
 });
 export type DraftEmailInput = z.infer<typeof DraftEmailInputSchema>;
 
@@ -22,9 +21,7 @@ const DraftEmailOutputSchema = z.object({
 });
 export type DraftEmailOutput = z.infer<typeof DraftEmailOutputSchema>;
 
-export async function draftEmail(
-  input: DraftEmailInput
-): Promise<DraftEmailOutput> {
+export async function draftEmail(input: DraftEmailInput): Promise<DraftEmailOutput> {
   return draftEmailFlow(input);
 }
 
@@ -32,9 +29,7 @@ const prompt = ai.definePrompt({
   name: "draftEmailPrompt",
   input: {
     schema: z.object({
-      prompt: z
-        .string()
-        .describe("The prompt describing the desired email content."),
+      prompt: z.string().describe("The prompt describing the desired email content."),
     }),
   },
   output: {
@@ -45,10 +40,7 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI email assistant. Please draft an email based on the following prompt: {{{prompt}}}`,
 });
 
-const draftEmailFlow = ai.defineFlow<
-  typeof DraftEmailInputSchema,
-  typeof DraftEmailOutputSchema
->(
+const draftEmailFlow = ai.defineFlow<typeof DraftEmailInputSchema, typeof DraftEmailOutputSchema>(
   {
     name: "draftEmailFlow",
     inputSchema: DraftEmailInputSchema,

@@ -1,8 +1,5 @@
 "use client";
 
-import { CloseIcon } from "@/components/CloseIcon";
-import { NoAgentNotification } from "@/components/NoAgentNotification";
-import TranscriptionView from "@/components/TranscriptionView";
 import {
   BarVisualizer,
   DisconnectButton,
@@ -15,6 +12,9 @@ import { useKrispNoiseFilter } from "@livekit/components-react/krisp";
 import { AnimatePresence, motion } from "framer-motion";
 import { Room, RoomEvent } from "livekit-client";
 import { useCallback, useEffect, useState } from "react";
+import { CloseIcon } from "../components/CloseIcon";
+import { NoAgentNotification } from "../components/NoAgentNotification";
+import TranscriptionView from "../components/TranscriptionView";
 import type { ConnectionDetails } from "./api/connection-details/route";
 
 export default function Page() {
